@@ -12,7 +12,6 @@ class input_handler:
         self.visit_time_range = 3
         self.cornershape = 4
         self.dim_of_point = 2
-        self.mask_list_num = []
     def zig_zag_path(self,path_corners_index): #path corners index = [[start_corner_index, end_corner_index], ....] = array 2d (path_lengh,2)
         path_gazebo = []
         path_corners = []
@@ -129,7 +128,7 @@ class input_handler:
         #the baseline mode of data structure, which is just adding an extra axis to the point, that
         # is, if a point is going to be visited twice, just split it into two different points, with
         #different time stamps
-        self.mask_list_num = []
+        mask_list_num = [0]
         self.X_all = input_handler.every_point(self)
         self.X_central = input_handler.central_point(self)
         visited_time_count = 0
@@ -144,18 +143,18 @@ class input_handler:
             #decide how much time a point should be waited until next time it can be visited
             visited_time = np.random.choice(range(1,self.visit_time_range),1).tolist()[0]
             visited_time_count += visited_time
-            self.mask_list_num.append(visited_time_count)
+            mask_list_num.append(visited_time_count)
             #decide how many times a point should be visited
             waiting_time = np.random.choice(range(1,self.waiting_time_range),1).tolist()[0]
             for j in range(visited_time):
                 reshape_temp = np.insert(reshape_tool[i],self.dim_of_point,waiting_time*j,axis=1)
                 output.extend(reshape_temp.tolist())
                 if j > 0:
-                    waiting_time_list.append(waiting_time)
+                    waiting_time_list.extend([waiting_time]*self.cornershape)
                 else:
-                    waiting_time_list.append(waiting_time)
+                    waiting_time_list.extend([0]*self.cornershape)
             
-        return output,self.mask_list_num,waiting_time_list
+        return output,mask_list_num,waiting_time_list
 
     def central_point(self):
         self.X_central = []
@@ -168,12 +167,19 @@ class input_handler:
     # using barrier_avoid to let the agent take a movement between decisions
     # the barrier points should be different from normal tsp points, they should be loaded in another way, and be considered in another way 
     #def barrier_avoid(self, recent_points):
-        
-    def outcorner_getout(self,rectangle_inf,B):# horizontal line = row
+
+
+    def outcorner_getout(self,rectangle_inf,B,mask_list_num):# horizontal line = row
         feature = torch.Tensor([])
+        mapping_tool = []
         # is odd? is row?
+        mask_list_num.append(len(rectangle_inf))
+        for i in range(1,len(mask_list_num)):
+            for j in range(mask_list_num[i]-mask_list_num[i-1]):
+                mapping_tool.append(i-1)
         for inf in rectangle_inf:
-            rectangle = self.target_metrices[0][int(inf)][0]
+            which_rec = mapping_tool[int(inf)]
+            rectangle = self.target_metrices[0][which_rec][0]
             index = 4*int(inf)
             corner = inf - int(inf)
             if len(rectangle) > len(rectangle[0]): # is column the long side?
