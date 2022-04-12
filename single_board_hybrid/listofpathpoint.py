@@ -7,6 +7,12 @@ class input_handler:
     def __init__(self, jsonfilename):
         self.target_metrices = cnc_input.main(['-i', jsonfilename])
         self.X_all = []
+        self.X_central = []
+        self.waiting_time_range = 10
+        self.visit_time_range = 3
+        self.cornershape = 4
+        self.dim_of_point = 2
+        self.mask_list_num = []
     def zig_zag_path(self,path_corners_index): #path corners index = [[start_corner_index, end_corner_index], ....] = array 2d (path_lengh,2)
         path_gazebo = []
         path_corners = []
@@ -104,42 +110,6 @@ class input_handler:
         return walkpoints'''
         return sides_of_matrix
 
-
-    def package_points(self): # unused
-        X_all = []
-        print(self.target_metrices[1])
-        for matrix in self.target_metrices[0]:
-            x = matrix[1]
-            y = matrix[2]
-            rectangle = matrix[0]
-            if len(rectangle) > len(rectangle[0]):
-                long_side = len(rectangle)
-            else:
-                long_side = len(rectangle[0])
-            if (int(long_side / self.target_metrices[1]) % 2 == 0):
-                corners = [[x, y], [x + len(rectangle), y],\
-                           [x, y + len(rectangle[0])], [x + len(rectangle), y + len(rectangle[0])]]
-            else:
-                corners = [[x, y], [x + len(rectangle), y + len(rectangle[0])],\
-                           [x + len(rectangle), y], [x, y + len(rectangle[0])]]
-            X_all.append(corners)
-        return X_all
-    def point_scale(self): # unused
-        X_all = []
-        for matrix in self.target_metrices[0]:
-            x = matrix[1]
-            y = matrix[2]
-            rectangle = matrix[0]
-            if len(rectangle) > len(rectangle[0]):
-                long_side = len(rectangle)
-            else:
-                long_side = len(rectangle[0])   
-            if(int(long_side / self.targetmatrices[1] % 2 == 0)):
-                odd_even = 0
-            else:
-                odd_even = 1
-            X_all.append([x,y,len(rectangle),len(rectangle[0]),odd_even])
-        return X_all
     def every_point(self):
         self.X_all = []
         for matrix in self.target_metrices[0]:
@@ -155,14 +125,46 @@ class input_handler:
             
             self.X_all.extend([[x_lu,y_lu],[x_ru,y_ru],[x_rd,y_rd],[x_ld,y_ld]])
         return self.X_all
+    def baseline_points(self):#map_center should be a tuple that represents the split point of ROIs
+        #the baseline mode of data structure, which is just adding an extra axis to the point, that
+        # is, if a point is going to be visited twice, just split it into two different points, with
+        #different time stamps
+        self.mask_list_num = []
+        self.X_all = input_handler.every_point(self)
+        self.X_central = input_handler.central_point(self)
+        visited_time_count = 0
+        output = []
+        waiting_time_list = []
+        reshape_tool = np.asarray(self.X_all) # X_all.shape = (len(X_all),2)
+        reshape_tool = reshape_tool.reshape(((int(len(self.X_all)/self.cornershape)),self.cornershape,\
+                                             self.dim_of_point))
+
+        for i in range(len(reshape_tool)):    # 4*2
+        # decide which region a rectangle should be
+            #decide how much time a point should be waited until next time it can be visited
+            visited_time = np.random.choice(range(1,self.visit_time_range),1).tolist()[0]
+            visited_time_count += visited_time
+            self.mask_list_num.append(visited_time_count)
+            #decide how many times a point should be visited
+            waiting_time = np.random.choice(range(1,self.waiting_time_range),1).tolist()[0]
+            for j in range(visited_time):
+                reshape_temp = np.insert(reshape_tool[i],self.dim_of_point,waiting_time*j,axis=1)
+                output.extend(reshape_temp.tolist())
+                if j > 0:
+                    waiting_time_list.append(waiting_time)
+                else:
+                    waiting_time_list.append(waiting_time)
+            
+        return output,self.mask_list_num,waiting_time_list
+
     def central_point(self):
-        self.X_all = []
+        self.X_central = []
         for matrix in self.target_metrices[0]:
             rectangle = matrix[0]
             x_lu = matrix[1]
             y_lu = matrix[2]
-            self.X_all.extend([[x_lu + 0.5*len(rectangle),y_lu + 0.5*len(rectangle[0])]])
-        return self.X_all
+            self.X_central.extend([[x_lu + 0.5*len(rectangle),y_lu + 0.5*len(rectangle[0])]])
+        return self.X_central
     # using barrier_avoid to let the agent take a movement between decisions
     # the barrier points should be different from normal tsp points, they should be loaded in another way, and be considered in another way 
     #def barrier_avoid(self, recent_points):
