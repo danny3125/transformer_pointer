@@ -173,7 +173,6 @@ class input_handler:
         feature = torch.Tensor([])
         mapping_tool = []
         # is odd? is row?
-        mask_list_num.append(len(rectangle_inf))
         for i in range(1,len(mask_list_num)):
             for j in range(mask_list_num[i]-mask_list_num[i-1]):
                 mapping_tool.append(i-1)
