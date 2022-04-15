@@ -12,12 +12,16 @@ class input_handler:
         self.visit_time_range = 3
         self.cornershape = 4
         self.dim_of_point = 2
-    def zig_zag_path(self,path_corners_index): #path corners index = [[start_corner_index, end_corner_index], ....] = array 2d (path_lengh,2)
+    def zig_zag_path(self,path_corners_index,mask_list_num): #path corners index = [[start_corner_index, end_corner_index], ....] = array 2d (path_lengh,2)
+        mapping_tool = []
+        for i in range(1,len(mask_list_num)):
+            for j in range(mask_list_num[i]-mask_list_num[i-1]):
+                mapping_tool.append(i-1)
         path_gazebo = []
         path_corners = []
         self.X_all = input_handler.every_point(self)
         for index in path_corners_index:
-            path_corners.extend([self.X_all[index[0]],self.X_all[index[1]]])
+            path_corners.extend([self.X_all[mapping_tool[index[0]]],self.X_all[mapping_tool[index[1]]]])
 
         data = np.array(path_corners)
         plt.plot(data[:, 0], data[:, 1],color = 'black')
