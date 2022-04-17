@@ -12,25 +12,30 @@ class input_handler:
         self.visit_time_range = 3
         self.cornershape = 4
         self.dim_of_point = 2
+        self.num_rec = 25
     def zig_zag_path(self,path_corners_index,mask_list_num): #path corners index = [[start_corner_index, end_corner_index], ....] = array 2d (path_lengh,2)
         mapping_tool = []
         for i in range(1,len(mask_list_num)):
             for j in range(mask_list_num[i]-mask_list_num[i-1]):
                 mapping_tool.append(i-1)
+        #now I have the mapping tool, it's time to map it again to a corner list [0,1] => [0,0,0,0,1,1,1,1]
+        print(mapping_tool)
         path_gazebo = []
         path_corners = []
         self.X_all = input_handler.every_point(self)
         for index in path_corners_index:
-            path_corners.extend([self.X_all[mapping_tool[index[0]]],self.X_all[mapping_tool[index[1]]]])
-
+            path_corners.extend([self.X_all[self.cornershape*mapping_tool[int(index[0]/self.cornershape)]+(index[0]%self.cornershape)],self.X_all[self.cornershape*mapping_tool[int(index[1]/self.cornershape)]+(index[1]%self.cornershape)]])
+        print(path_corners_index)
+        print(path_corners)
         data = np.array(path_corners)
         plt.plot(data[:, 0], data[:, 1],color = 'black')
         data_1 = np.array(self.X_all)
-        data_1 = np.reshape(data_1,(34,4,2))
+        data_1 = np.reshape(data_1,(self.num_rec,self.cornershape,self.dim_of_point))
         for rec in data_1:
             rec = np.concatenate((rec,[rec[0]]),axis= 0)
             plt.plot(rec[:, 0], rec[:, 1],color = 'red')
         plt.show()
+        '''
         for index in path_corners_index: #find the longer side => zig-zag to end point
             corner_num = index[0] % 4
             if (abs(self.X_all[index[0]][0] - self.X_all[index[1]][0])) > (abs(self.X_all[index[0]][1] - self.X_all[index[1]][1])): #if longer side = horizon side = row side
@@ -91,6 +96,7 @@ class input_handler:
                         way_2 = x_way_right
                     else:
                         way_2 = x_way_left
+        '''
         return path_gazebo
 
 
