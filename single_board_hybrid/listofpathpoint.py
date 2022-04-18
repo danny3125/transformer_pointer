@@ -19,14 +19,12 @@ class input_handler:
             for j in range(mask_list_num[i]-mask_list_num[i-1]):
                 mapping_tool.append(i-1)
         #now I have the mapping tool, it's time to map it again to a corner list [0,1] => [0,0,0,0,1,1,1,1]
-        print(mapping_tool)
         path_gazebo = []
         path_corners = []
         self.X_all = input_handler.every_point(self)
         for index in path_corners_index:
             path_corners.extend([self.X_all[self.cornershape*mapping_tool[int(index[0]/self.cornershape)]+(index[0]%self.cornershape)],self.X_all[self.cornershape*mapping_tool[int(index[1]/self.cornershape)]+(index[1]%self.cornershape)]])
-        print(path_corners_index)
-        print(path_corners)
+
         data = np.array(path_corners)
         plt.plot(data[:, 0], data[:, 1],color = 'black')
         data_1 = np.array(self.X_all)
