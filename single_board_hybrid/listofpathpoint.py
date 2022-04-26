@@ -9,10 +9,10 @@ class input_handler:
         self.X_all = []
         self.X_central = []
         self.waiting_time_range = 10
-        self.visit_time_range = 3
+        self.visit_time_range = 4
         self.cornershape = 4
         self.dim_of_point = 2
-        self.num_rec = 25
+        self.num_rec = 34
     def zig_zag_path(self,path_corners_index,mask_list_num): #path corners index = [[start_corner_index, end_corner_index], ....] = array 2d (path_lengh,2)
         mapping_tool = []
         for i in range(1,len(mask_list_num)):
@@ -149,11 +149,12 @@ class input_handler:
         for i in range(len(reshape_tool)):    # 4*2
         # decide which region a rectangle should be
             #decide how much time a point should be waited until next time it can be visited
+            np.random.seed(i)
             visited_time = np.random.choice(range(1,self.visit_time_range),1).tolist()[0]
             visited_time_count += visited_time
             mask_list_num.append(visited_time_count)
             #decide how many times a point should be visited
-            waiting_time = np.random.choice(range(1,self.waiting_time_range),1).tolist()[0]
+            waiting_time = self.waiting_time_range/2#np.random.choice(range(1,self.waiting_time_range),1).tolist()[0]
             for j in range(visited_time):
                 reshape_temp = np.insert(reshape_tool[i],self.dim_of_point,waiting_time*j,axis=1)
                 output.extend(reshape_temp.tolist())
