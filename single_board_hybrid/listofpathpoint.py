@@ -12,7 +12,7 @@ class input_handler:
         self.visit_time_range = 4
         self.cornershape = 4
         self.dim_of_point = 2
-        self.num_rec = 34
+        self.num_rec = 25
     def zig_zag_path(self,path_corners_index,mask_list_num): #path corners index = [[start_corner_index, end_corner_index], ....] = array 2d (path_lengh,2)
         mapping_tool = []
         for i in range(1,len(mask_list_num)):
