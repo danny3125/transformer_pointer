@@ -54,7 +54,7 @@ def main(argv = None):
                         target_areas.append((target_area,start_point[0],start_point[1]))
                     else:
                         gluewidth = end_point[0]
-                return target_areas , gluewidth
+                return target_areas , int(gluewidth)
             except Exception as e:
                 print(e.with_traceback())
     except Exception as e:

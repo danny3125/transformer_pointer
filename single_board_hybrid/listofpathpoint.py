@@ -130,7 +130,7 @@ class input_handler:
             x_rd = x_ru 
             y_rd = y_ld 
             
-            self.X_all.extend([[x_lu,y_lu],[x_ru,y_ru],[x_rd,y_rd],[x_ld,y_ld]])
+            self.X_all.extend([[int(x_ld),int(y_ld)],[int(x_rd),int(y_rd)],[int(x_ru),int(y_ru)],[int(x_lu),int(y_lu)]])
         return self.X_all
     def baseline_points(self):#map_center should be a tuple that represents the split point of ROIs
         #the baseline mode of data structure, which is just adding an extra axis to the point, that
