@@ -137,6 +137,7 @@ class input_handler:
         # is, if a point is going to be visited twice, just split it into two different points, with
         #different time stamps
         mask_list_num = [0]
+        visit_count_initial = []
         self.X_all = input_handler.every_point(self)
         self.X_central = input_handler.central_point(self)
         visited_time_count = 0
@@ -153,6 +154,7 @@ class input_handler:
             visited_time = np.random.choice(range(1,self.visit_time_range),1).tolist()[0]
             visited_time_count += visited_time
             mask_list_num.append(visited_time_count)
+            visit_count_initial.append(visited_time)
             #decide how many times a point should be visited
             waiting_time = self.waiting_time_range/2#np.random.choice(range(1,self.waiting_time_range),1).tolist()[0]
             for j in range(visited_time):
@@ -163,7 +165,7 @@ class input_handler:
                 else:
                     waiting_time_list.extend([0]*self.cornershape)
             
-        return output,mask_list_num,waiting_time_list
+        return output,visit_count_initial,mask_list_num
 
     def central_point(self):
         self.X_central = []
