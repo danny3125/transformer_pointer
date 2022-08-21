@@ -8,8 +8,8 @@ class input_handler:
         self.target_metrices = cnc_input.main(['-i', jsonfilename])
         self.X_all = []
         self.X_central = []
-        self.waiting_time_range = 10
-        self.visit_time_range = 4
+        self.waiting_time_range = 20
+        self.visit_time_range = 3
         self.cornershape = 4
         self.dim_of_point = 2
         self.num_rec = 25
