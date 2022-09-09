@@ -9,7 +9,7 @@ class input_handler:
         self.X_all = []
         self.X_central = []
         self.waiting_time_range = 20
-        self.visit_time_range = 3
+        self.visit_time_range = 4
         self.cornershape = 4
         self.dim_of_point = 2
         self.num_rec = 25
@@ -29,9 +29,18 @@ class input_handler:
         plt.plot(data[:, 0], data[:, 1],color = 'black')
         data_1 = np.array(self.X_all)
         data_1 = np.reshape(data_1,(self.num_rec,self.cornershape,self.dim_of_point))
+        color_index = 1
         for rec in data_1:
             rec = np.concatenate((rec,[rec[0]]),axis= 0)
-            plt.plot(rec[:, 0], rec[:, 1],color = 'red')
+            if (mask_list_num[color_index]-mask_list_num[color_index-1]) == 1:
+                plt.plot(rec[:, 0], rec[:, 1], color='red')
+            elif (mask_list_num[color_index] - mask_list_num[color_index - 1]) == 2:
+                plt.plot(rec[:, 0], rec[:, 1], color='blue')
+            elif (mask_list_num[color_index] - mask_list_num[color_index - 1]) == 3:
+                plt.plot(rec[:, 0], rec[:, 1], color='green')
+            else:
+                plt.plot(rec[:, 0], rec[:, 1], color='yellow')
+            color_index+=1
         plt.show()
         '''
         for index in path_corners_index: #find the longer side => zig-zag to end point
@@ -166,7 +175,39 @@ class input_handler:
                     waiting_time_list.extend([0]*self.cornershape)
             
         return output,visit_count_initial,mask_list_num
-
+    def GCN_ver_points(self):
+        mask_list_num = [0]
+        visit_count_initial = []
+        self.X_all = input_handler.every_point(self)
+        self.X_central = input_handler.central_point(self)
+        visited_time_count = 0
+        output = []
+        waiting_time_list = []
+        reshape_tool = np.asarray(self.X_all) # X_all.shape = (len(X_all),2)
+        reshape_tool = reshape_tool.reshape(((int(len(self.X_all)/self.cornershape)),self.cornershape,\
+                                             self.dim_of_point))
+        for i in range(len(reshape_tool)):    # 4*2
+        # decide which region a rectangle should be
+            #decide how much time a point should be waited until next time it can be visited
+            if i < 17:
+                visited_time = 3
+            else:
+                visited_time = 5
+                # np.random.seed(i)
+                # visited_time = np.random.choice(range(1, self.visit_time_range), 1).tolist()[0]
+            visited_time_count += visited_time
+            mask_list_num.append(visited_time_count)
+            visit_count_initial.append(visited_time)
+            # decide how many times a point should be visited
+            waiting_time = self.waiting_time_range / 2
+            for j in range(visited_time):
+                reshape_temp = np.insert(reshape_tool[i],self.dim_of_point,waiting_time*j,axis=1)
+                output.extend(reshape_temp.tolist())
+                if j > 0:
+                    waiting_time_list.extend([waiting_time]*self.cornershape)
+                else:
+                    waiting_time_list.extend([0]*self.cornershape)
+        return output, visit_count_initial, mask_list_num
     def central_point(self):
         self.X_central = []
         for matrix in self.target_metrices[0]:
